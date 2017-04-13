@@ -55,7 +55,7 @@ class TileCodingLayer:
         learning_rate = learning_rate / self.num_tilings
         upd = grad_ * learning_rate * (y - y_hat)
         updates = [(self.weight, self.weight + upd)]
-        return updates
+        return updates, grad_
 
 
 def get_tile_coder(min_val, max_val, num_tiles, num_tilings,
@@ -72,9 +72,9 @@ def get_tile_coder(min_val, max_val, num_tiles, num_tilings,
     # quantized_x
     q_x = tile_coding_layer.quantize(x)
     y_hat = tile_coding_layer.approximate(q_x)
-    updates = tile_coding_layer.update_rule(y, y_hat, 0.1)
+    updates, grad_ = tile_coding_layer.update_rule(y, y_hat, learning_rate)
 
     train = theano.function([x, y], y_hat, updates=updates, allow_input_downcast=True)
-    eval_ = theano.function([x], y_hat, allow_input_downcast=True)
+    eval_ = theano.function([x], [y_hat, grad_], allow_input_downcast=True)
 
     return train, eval_
