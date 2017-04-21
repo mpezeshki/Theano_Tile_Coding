@@ -5,7 +5,6 @@ from mpl_toolkits.mplot3d import Axes3D
 from layers import get_tile_coder
 
 
-# x.shape: (num_features)
 def target_function(x):
     return np.sin(x[0]) + np.cos(x[1]) + 0.01 * np.random.randn()
 
@@ -21,7 +20,7 @@ def get_dataset(num_samples, min_val, max_val):
     return dataset
 
 
-def plot_function(ax, function, text, hold=False):
+def plot_function(ax, function, text, index, hold=False):
     ax.cla()
     x_0 = np.linspace(0, 7, 100)
     x_1 = np.linspace(0, 7, 100)
@@ -43,7 +42,7 @@ def plot_function(ax, function, text, hold=False):
         plt.show()
     else:
         plt.draw()
-        plt.savefig(text + '.png')
+        # plt.savefig(str(index) + '.png')
         plt.pause(.0001)
 
 train, eval_ = get_tile_coder(
@@ -51,27 +50,24 @@ train, eval_ = get_tile_coder(
     num_tilings=10, num_features=2,
     learning_rate=0.1)
 
-dataset = get_dataset(10000, 0, 7)
+dataset = get_dataset(600, 0, 7)
 fig = plt.figure(figsize=np.array([12, 5]))
 ax_0 = fig.add_subplot(1, 2, 1, projection='3d')
 ax_1 = fig.add_subplot(1, 2, 2, projection='3d')
-plot_function(ax_0, target_function, 'Target function')
-# import ipdb; ipdb.set_trace()
+plot_function(ax_0, target_function, 'Target function', 0)
 
 print 'Training'
 for i, datapoint in enumerate(dataset):
     x, y = datapoint
     train(x.astype('float32'), y.astype('float32'))
-    if i <= 20:
-        step = 5
-    elif i <= 100:
-        step = 20
-    elif i <= 1500:
-        step = 100
+    if i <= 50:
+        step = 10
+    if i <= 250:
+        step = 50
     else:
-        step = 1000
+        step = 100
     if i % step == 0:
-        plot_function(ax_1, eval_, 'Seen points: ' + str(i))
+        plot_function(ax_1, eval_, 'Seen points: ' + str(i), i + 1)
 
     if i == len(dataset) - 1:
-        plot_function(ax_1, eval_, 'Learned Function', True)
+        plot_function(ax_1, eval_, 'Learned Function', i + 1, True)
